@@ -1,0 +1,696 @@
+[gd_scene load_steps=32 format=1]
+
+[ext_resource path="res://scripts/game.gd" type="Script" id=1]
+[ext_resource path="res://sprites/msgbox.tex" type="Texture" id=2]
+[ext_resource path="res://fonts/opensans.fnt" type="BitmapFont" id=3]
+[ext_resource path="res://sprites/notification_hud.tex" type="Texture" id=4]
+[ext_resource path="res://scripts/notification_hud.gd" type="Script" id=5]
+[ext_resource path="res://fonts/opensans_32.fnt" type="BitmapFont" id=6]
+[ext_resource path="res://sprites/health_hud.tex" type="Texture" id=7]
+[ext_resource path="res://sprites/health_bar.tex" type="Texture" id=8]
+[ext_resource path="res://sprites/tomato.tex" type="Texture" id=9]
+[ext_resource path="res://sprites/pause_btn.tex" type="Texture" id=10]
+[ext_resource path="res://scripts/touch_button.gd" type="Script" id=11]
+[ext_resource path="res://scripts/joystick.gd" type="Script" id=12]
+[ext_resource path="res://sprites/joybg.tex" type="Texture" id=13]
+[ext_resource path="res://sprites/joy.tex" type="Texture" id=14]
+[ext_resource path="res://sprites/flatDark25.tex" type="Texture" id=15]
+[ext_resource path="res://sprites/flatDark47.tex" type="Texture" id=16]
+[ext_resource path="res://sprites/flatDark44.tex" type="Texture" id=17]
+[ext_resource path="res://sprites/white.tex" type="Texture" id=18]
+[ext_resource path="res://sprites/window.tex" type="Texture" id=19]
+[ext_resource path="res://scripts/skill_window.gd" type="Script" id=20]
+[ext_resource path="res://scripts/menu_window.gd" type="Script" id=21]
+[ext_resource path="res://sprites/button_wide.tex" type="Texture" id=22]
+[ext_resource path="res://sprites/button_wide_p.tex" type="Texture" id=23]
+[ext_resource path="res://sprites/button_wide_h.tex" type="Texture" id=24]
+[ext_resource path="res://scripts/camera.gd" type="Script" id=25]
+[ext_resource path="res://scripts/levels.gd" type="Script" id=26]
+[ext_resource path="res://sounds/ambience/Jewel-Thieves.ogg" type="AudioStream" id=27]
+
+[sub_resource type="Animation" id=1]
+
+resource/name = "fade"
+length = 3.0
+loop = false
+loop_interpolation = true
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:visibility/opacity")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = { "times":FloatArray( 0, 0.5, 2.5, 3 ), "transitions":FloatArray( 1, 1, 1, 1 ), "update":0, "values":[ 0.0, 1.0, 1.0, 0.0 ] }
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:visibility/visible")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = { "times":FloatArray( 0, 3 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+
+[sub_resource type="CanvasItemShader" id=2]
+
+_code = { "fragment":"float radius = 0.0025;\nvec3 col = vec3(0);\n\ncol+= texscreen(SCREEN_UV+vec2(-radius,-radius));\ncol+= texscreen(SCREEN_UV+vec2(0,-radius));\ncol+= texscreen(SCREEN_UV+vec2(radius,-radius));\n\ncol+= texscreen(SCREEN_UV+vec2(-radius,0));\ncol+= texscreen(SCREEN_UV+vec2(0,0));\ncol+= texscreen(SCREEN_UV+vec2(radius,0));\n\n\ncol+= texscreen(SCREEN_UV+vec2(-radius,radius));\ncol+= texscreen(SCREEN_UV+vec2(0,radius));\ncol+= texscreen(SCREEN_UV+vec2(radius,radius));\n\ncol/=9.0;\nCOLOR.rgb=col*0.5;\n", "fragment_ofs":0, "light":"", "light_ofs":0, "vertex":"", "vertex_ofs":0 }
+
+[sub_resource type="CanvasItemMaterial" id=3]
+
+shader/shader = SubResource( 2 )
+shader/shading_mode = 0
+
+[sub_resource type="GDScript" id=4]
+
+script/source = "extends Label\n\nfunc _ready():\n\tset_process(true);\n\nfunc _process(delta):\n\tset_text(\"FPS: \"+str(OS.get_frames_per_second()));"
+
+[node name="game" type="Node"]
+
+process/pause_mode = 2
+script/script = ExtResource( 1 )
+
+[node name="gui" type="Control" parent="."]
+
+process/pause_mode = 2
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+__meta__ = { "_edit_lock_":true }
+
+[node name="msgbox" type="TextureFrame" parent="gui"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 256.0
+margin/bottom = 146.0
+texture = ExtResource( 2 )
+stretch_mode = 0
+__meta__ = { "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/msgbox"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 17.0
+margin/top = 19.0
+margin/right = 237.0
+margin/bottom = 106.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+text = "NULL"
+align = 1
+valign = 1
+autowrap = true
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="notification_hud" type="TextureFrame" parent="gui"]
+
+process/pause_mode = 1
+anchor/right = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 0.0
+margin/top = 120.0
+margin/right = 0.0
+margin/bottom = 168.0
+texture = ExtResource( 4 )
+expand = true
+stretch_mode = 0
+script/script = ExtResource( 5 )
+__meta__ = { "_edit_lock_":true, "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/notification_hud"]
+
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_fonts/font = ExtResource( 6 )
+text = "Test"
+align = 1
+valign = 2
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="gui/notification_hud"]
+
+playback/process_mode = 1
+playback/default_blend_time = 0.0
+root/root = NodePath("..")
+anims/fade = SubResource( 1 )
+playback/active = true
+playback/speed = 1.0
+blend_times = [  ]
+autoplay = ""
+
+[node name="health_hud" type="TextureFrame" parent="gui"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 10.0
+margin/top = 10.0
+margin/right = 337.0
+margin/bottom = 119.0
+texture = ExtResource( 7 )
+stretch_mode = 0
+__meta__ = { "_edit_lock_":true, "_editor_collapsed":true }
+
+[node name="health_bar" type="TextureProgress" parent="gui/health_hud"]
+
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 109.0
+margin/top = 25.0
+margin/right = 316.0
+margin/bottom = 51.0
+range/min = 0.0
+range/max = 100.0
+range/step = 1.0
+range/page = 0.0
+range/value = 100.0
+range/exp_edit = false
+range/rounded = false
+texture/under = null
+texture/over = null
+texture/progress = ExtResource( 8 )
+radial_fill/initial_angle = 5.1848e-44
+radial_fill/fill_degrees = 360.0
+radial_fill/center_offset = Vector2( 0, 0 )
+__meta__ = { "_edit_lock_":true }
+
+[node name="tomato" type="TextureFrame" parent="gui/health_hud"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 109.0
+margin/top = 76.0
+margin/right = 124.0
+margin/bottom = 90.0
+texture = ExtResource( 9 )
+stretch_mode = 2
+__meta__ = { "_edit_lock_":true }
+
+[node name="pause_btn" type="TextureFrame" parent="gui"]
+
+anchor/left = 1
+anchor/right = 1
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 66.0
+margin/top = 10.0
+margin/right = 10.0
+margin/bottom = 66.0
+texture = ExtResource( 10 )
+stretch_mode = 0
+script/script = ExtResource( 11 )
+__meta__ = { "_edit_lock_":true }
+
+[node name="controller_joystick" type="Control" parent="gui"]
+
+anchor/top = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 86.0
+margin/top = 88.0
+margin/right = 87.0
+margin/bottom = 87.0
+script/script = ExtResource( 12 )
+__meta__ = { "_edit_lock_":true, "_editor_collapsed":true }
+
+[node name="bg" type="TextureFrame" parent="gui/controller_joystick"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = -60.0
+margin/top = -60.0
+margin/right = 60.0
+margin/bottom = 60.0
+texture = ExtResource( 13 )
+stretch_mode = 0
+
+[node name="joy" type="TextureFrame" parent="gui/controller_joystick"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = -32.0
+margin/top = -32.0
+margin/right = 32.0
+margin/bottom = 32.0
+texture = ExtResource( 14 )
+stretch_mode = 0
+
+[node name="controller_up" type="TextureFrame" parent="gui"]
+
+anchor/left = 1
+anchor/top = 1
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 124.0
+margin/top = 109.0
+margin/right = 44.0
+margin/bottom = 29.0
+texture = ExtResource( 15 )
+stretch_mode = 0
+script/script = ExtResource( 11 )
+__meta__ = { "_edit_lock_":true }
+
+[node name="controller_attack" type="TextureFrame" parent="gui"]
+
+anchor/left = 1
+anchor/top = 1
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 224.0
+margin/top = 109.0
+margin/right = 144.0
+margin/bottom = 29.0
+texture = ExtResource( 16 )
+stretch_mode = 0
+script/script = ExtResource( 11 )
+__meta__ = { "_edit_lock_":true }
+
+[node name="controller_enter" type="TextureFrame" parent="gui"]
+
+visibility/visible = false
+anchor/left = 1
+anchor/top = 1
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 124.0
+margin/top = 209.0
+margin/right = 44.0
+margin/bottom = 129.0
+texture = ExtResource( 17 )
+stretch_mode = 0
+script/script = ExtResource( 11 )
+__meta__ = { "_edit_lock_":true }
+
+[node name="fx_blur" type="TextureFrame" parent="gui"]
+
+visibility/visible = false
+material/material = SubResource( 3 )
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+texture = ExtResource( 18 )
+expand = true
+stretch_mode = 0
+__meta__ = { "_edit_lock_":true }
+
+[node name="skill_window" type="Patch9Frame" parent="gui"]
+
+visibility/visible = false
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 224.0
+margin/top = 162.0
+margin/right = -224.0
+margin/bottom = -162.0
+texture = ExtResource( 19 )
+patch_margin/left = 64
+patch_margin/top = 64
+patch_margin/right = 64
+patch_margin/bottom = 64
+script/script = ExtResource( 20 )
+__meta__ = { "_edit_lock_":true, "_editor_collapsed":true }
+
+[node name="title" type="Label" parent="gui/skill_window"]
+
+anchor/left = 3
+anchor/right = 3
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 197.0
+margin/top = 25.0
+margin/right = 73.0
+margin/bottom = 61.0
+custom_fonts/font = ExtResource( 6 )
+custom_colors/font_color = Color( 0.640625, 0.640625, 0.640625, 1 )
+text = "Skills"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="sp" type="Label" parent="gui/skill_window"]
+
+anchor/left = 3
+anchor/right = 3
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 98.0
+margin/top = 21.0
+margin/right = -26.0
+margin/bottom = 57.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.640625, 0.640625, 0.640625, 1 )
+text = "SP: 0"
+valign = 2
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="container" type="ScrollContainer" parent="gui/skill_window"]
+
+anchor/left = 3
+anchor/top = 1
+anchor/right = 3
+anchor/bottom = 1
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 197.0
+margin/top = 249.0
+margin/right = -195.0
+margin/bottom = 35.0
+scroll/horizontal = false
+scroll/vertical = true
+__meta__ = { "_editor_collapsed":true }
+
+[node name="list" type="VBoxContainer" parent="gui/skill_window/container"]
+
+focus/ignore_mouse = false
+focus/stop_mouse = false
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_constants/separation = 10
+alignment = 0
+
+[node name="menu_window" type="Patch9Frame" parent="gui"]
+
+process/pause_mode = 2
+visibility/visible = false
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 125.0
+margin/top = 150.0
+margin/right = -125.0
+margin/bottom = -150.0
+texture = ExtResource( 19 )
+patch_margin/left = 64
+patch_margin/top = 64
+patch_margin/right = 64
+patch_margin/bottom = 64
+script/script = ExtResource( 21 )
+__meta__ = { "_edit_lock_":true, "_editor_collapsed":true }
+
+[node name="btnReturn" type="TextureButton" parent="gui/menu_window"]
+
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 93.0
+margin/top = 108.0
+margin/right = -93.0
+margin/bottom = 60.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+textures/normal = ExtResource( 22 )
+textures/pressed = ExtResource( 23 )
+textures/hover = ExtResource( 24 )
+__meta__ = { "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/menu_window/btnReturn"]
+
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.773438, 0.773438, 0.773438, 1 )
+text = "Return"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="btnRestart" type="TextureButton" parent="gui/menu_window"]
+
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 93.0
+margin/top = 53.0
+margin/right = -93.0
+margin/bottom = 5.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+textures/normal = ExtResource( 22 )
+textures/pressed = ExtResource( 23 )
+textures/hover = ExtResource( 24 )
+__meta__ = { "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/menu_window/btnRestart"]
+
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.773438, 0.773438, 0.773438, 1 )
+text = "Restart"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="btnSkill" type="TextureButton" parent="gui/menu_window"]
+
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 93.0
+margin/top = -2.0
+margin/right = -93.0
+margin/bottom = -50.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+textures/normal = ExtResource( 22 )
+textures/pressed = ExtResource( 23 )
+textures/hover = ExtResource( 24 )
+__meta__ = { "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/menu_window/btnSkill"]
+
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.773438, 0.773438, 0.773438, 1 )
+text = "Skills"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="btnQuit" type="TextureButton" parent="gui/menu_window"]
+
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 3
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = 93.0
+margin/top = -59.0
+margin/right = -93.0
+margin/bottom = -107.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+textures/normal = ExtResource( 22 )
+textures/pressed = ExtResource( 23 )
+textures/hover = ExtResource( 24 )
+__meta__ = { "_editor_collapsed":true }
+
+[node name="txt" type="Label" parent="gui/menu_window/btnQuit"]
+
+anchor/right = 1
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 0.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0.773438, 0.773438, 0.773438, 1 )
+text = "Quit Game"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="fps_counter" type="Label" parent="gui"]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 0.0
+margin/top = 0.0
+margin/right = 40.0
+margin/bottom = 16.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+script/script = SubResource( 4 )
+
+[node name="env" type="Spatial" parent="."]
+
+process/pause_mode = 1
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="cam" type="Camera" parent="env"]
+
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+projection = 0
+fov = 60.0
+near = 0.1
+far = 100.0
+keep_aspect = 1
+current = false
+visible_layers = 1048575
+environment = null
+h_offset = 0.0
+v_offset = 0.0
+script/script = ExtResource( 25 )
+
+[node name="levels" type="Spatial" parent="env"]
+
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+script/script = ExtResource( 26 )
+
+[node name="ambience" type="StreamPlayer" parent="."]
+
+process/pause_mode = 1
+stream/stream = ExtResource( 27 )
+stream/play = false
+stream/loop = true
+stream/volume_db = 0.0
+stream/autoplay = true
+stream/paused = false
+stream/loop_restart_time = 0.0
+stream/buffering_ms = 500
+
+
