@@ -4,6 +4,7 @@ extends KinematicBody
 var g = -19.6;
 var vel = Vector3();
 var dir = Vector3();
+var chunk = [0,0];
 
 # Constants
 const MAX_SLOPE_ANGLE = 30;
@@ -95,3 +96,9 @@ func attack():
 	inst.apply_impulse(Vector3(), dir*20);
 	inst.set_angular_velocity(Vector3(1,1,1)*deg2rad(360));
 	get_node("../").add_child(inst, true);
+
+func kill():
+	var arr = globals.zombies_killed;
+	arr.push_back(chunk);
+	globals.zombies_killed = arr;
+	queue_free();

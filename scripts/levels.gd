@@ -64,15 +64,14 @@ func generate_chunk(chunk_pos):
 	seed(world_seed+(chunk_pos.x*2)+(chunk_pos.y*4));
 	rand_range(10, 100);
 	
-	if rand_range(10, 100) > 85:
-		add_object(chunk, obj_base, Vector3(-4, 0, -4));
-	elif rand_range(10, 100) > 80:
-		add_object(chunk, scn_zombie);
+	var spawn_base = rand_range(10, 100) > 85;
 	
 	for i in range(6):
-		if rand_range(10, 100) > 50:
+		var pos = Vector3(rand_range(-8.0,8.0), 0, rand_range(-8.0,8.0));
+		
+		if rand_range(10, 100) > 50 && (!spawn_base || (spawn_base && !Rect2(-10,-10,10,10).has_point(Vector2(pos.x, pos.z)))):
 			add_object(chunk, obj_tree[rand_range(0, obj_tree.size())], \
-			Vector3(rand_range(-8.0,8.0), 0, rand_range(-8.0,8.0)), \
+			pos, \
 			Vector3(0, rand_range(0.0, 360.0), 0), \
 			Vector3(1,1,1)*rand_range(1.0, 2.0));
 		
@@ -103,9 +102,17 @@ func generate_chunk(chunk_pos):
 		inst.set_flag(GeometryInstance.FLAG_CAST_SHADOW, 0);
 	chunk.add_child(inst, true);
 	
+	if spawn_base:
+		add_object(chunk, obj_base, Vector3(-4, 0, -4));
+		if globals.zombies_killed.find([chunk_pos.x, chunk_pos.y]) < 0:
+			var obj = add_object(chunk, scn_zombie, Vector3(-2,1,-2));
+			obj.chunk = [chunk_pos.x, chunk_pos.y];
+	
+	elif rand_range(10, 100) > 60 && globals.zombies_killed.find([chunk_pos.x, chunk_pos.y]) < 0:
+		var obj = add_object(chunk, scn_zombie, Vector3(rand_range(-6.0,6.0), 0, rand_range(-6.0,6.0)));
+		obj.chunk = [chunk_pos.x, chunk_pos.y];
+	
 	add_child(chunk, false);
-
-var thread = Thread.new();
 
 func _fixed_process(delta):
 	chunks_update();

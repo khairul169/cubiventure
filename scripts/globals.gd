@@ -38,6 +38,7 @@ var skill_throw;
 var skill_pocket;
 var skill_health;
 var skill_medic;
+var zombies_killed;
 
 func _init():
 	randomize();
@@ -80,6 +81,7 @@ func _init():
 	skill_pocket = 0.0;
 	skill_health = 0.0;
 	skill_medic = 0.0;
+	zombies_killed = [[0,0]];
 	
 	savedata_var.push_back("world_time");
 	savedata_var.push_back("world_seeds");
@@ -95,6 +97,7 @@ func _init():
 	savedata_var.push_back("skill_pocket");
 	savedata_var.push_back("skill_health");
 	savedata_var.push_back("skill_medic");
+	savedata_var.push_back("zombies_killed");
 
 func _ready():
 	get_tree().set_auto_accept_quit(false);

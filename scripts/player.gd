@@ -115,7 +115,7 @@ func _fixed_process(delta):
 			if collider extends preload("res://scripts/box.gd"):
 				collider.destroy();
 			if collider extends preload("res://scripts/zombie.gd"):
-				collider.queue_free();
+				collider.kill();
 				globals.game.player_give_exp(40);
 		
 		if (rad2deg(acos(n.dot(Vector3(0, 1, 0)))) < MAX_SLOPE_ANGLE):

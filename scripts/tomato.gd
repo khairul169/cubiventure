@@ -24,5 +24,6 @@ func body_enter(body):
 		queue_free();
 	
 	if owner extends preload("res://scripts/player.gd") && body extends preload("res://scripts/zombie.gd"):
-		body.queue_free();
+		body.kill();
+		globals.game.player_give_exp(40);
 		queue_free();
