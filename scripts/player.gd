@@ -162,7 +162,25 @@ func _fixed_process(delta):
 		else:
 			set_animation("idle");
 	
+	update_laser();
 	globals.player_pos = get_global_transform().origin;
+
+func update_laser():
+	var mesh = get_node("laser");
+	if !aiming:
+		mesh.hide();
+		return;
+	
+	mesh.show();
+	var begin = Vector3(0,0.8,1);
+	var end = begin+Vector3(0,0,1)*100;
+	var mesh = get_node("laser");
+	mesh.get_material_override().set_line_width(2);
+	mesh.clear();
+	mesh.begin(Mesh.PRIMITIVE_LINE_STRIP, null);
+	mesh.add_vertex(begin);
+	mesh.add_vertex(end);
+	mesh.end();
 
 func set_animation(ani, force = false, speed = 1.0):
 	var ap = get_node("models/AnimationPlayer");
