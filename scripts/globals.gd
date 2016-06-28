@@ -3,6 +3,7 @@ extends Node
 var game;
 var gui;
 var env;
+var player;
 
 const CONFIG_PATH = "user://config.dat";
 var config_var = [];
@@ -81,7 +82,7 @@ func _init():
 	skill_pocket = 0.0;
 	skill_health = 0.0;
 	skill_medic = 0.0;
-	zombies_killed = [[0,0]];
+	zombies_killed = [];
 	
 	savedata_var.push_back("world_time");
 	savedata_var.push_back("world_seeds");

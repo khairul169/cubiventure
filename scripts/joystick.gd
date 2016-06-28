@@ -68,9 +68,9 @@ func _input(e):
 			move_joystick(e.pos)
 
 func _ready():
-	if !OS.has_touchscreen_ui_hint():
-		hide();
-		return;
+	#if !OS.has_touchscreen_ui_hint():
+		#hide();
+		#return;
 	
 	joystick = get_node("joy");
 	set_process_input(true);

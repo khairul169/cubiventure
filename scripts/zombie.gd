@@ -65,9 +65,9 @@ func _fixed_process(delta):
 		if globals.env.has_node("player"):
 			var player = globals.env.get_node("player");
 			var dist = globals.env.get_node("player").get_global_transform().origin-get_global_transform().origin;
-			var eyesight = 10.0;
+			var eyesight = 15.0;
 			if globals.world_time >= 18 || globals.world_time < 5.5:
-				eyesight = 15.0;
+				eyesight = 20.0;
 			
 			if dist.length() < eyesight:
 				dir.x = dist.x;

@@ -26,7 +26,7 @@ func _ready():
 	OS.set_target_fps(globals.cfg_fpscap);
 	OS.set_low_processor_usage_mode(globals.cfg_lowprocessmode);
 	
-	next_tomato_reload = 10.0;
+	next_tomato_reload = 8.0;
 	
 	init_gui();
 	construct_level();
@@ -44,8 +44,6 @@ func _input(ie):
 	if ie.type == InputEvent.KEY && ie.pressed:
 		if ie.scancode == KEY_ESCAPE:
 			key_escape();
-		if ie.scancode == KEY_S:
-			toggle_skillmenu();
 
 func key_escape():
 	if get_node("gui/skill_window").is_visible():
@@ -53,12 +51,13 @@ func key_escape():
 	else:
 		toggle_menu();
 	
-	var f = get_node("gui").get_focus_owner();
+	var f = get_node("gui/fx_blur").get_focus_owner();
 	if f != null:
 		f.release_focus();
 
 func init_gui():
 	get_node("gui/fx_blur").hide();
+	get_node("gui/fx_blood_splat").hide();
 	get_node("gui/msgbox").hide();
 	get_node("gui/skill_window").hide();
 	get_node("gui/menu_window").hide();
@@ -67,31 +66,29 @@ func init_gui():
 	if !globals.cfg_showfps:
 		get_node("gui/fps_counter").hide();
 		get_node("gui/fps_counter").set_process(false);
-	
-	get_node("gui/pause_btn").connect("pressed", self, "on_pause_btn_pressed");
 
 func on_pause_btn_pressed():
 	key_escape();
 
 func toggle_menu(set = !get_node("gui/menu_window").is_visible()):
 	if set:
-		get_tree().set_pause(true);
 		get_node("gui/fx_blur").show();
 		get_node("gui/menu_window").show();
+		globals.player.cam.set_active(false);
 	else:
-		get_tree().set_pause(false);
 		get_node("gui/fx_blur").hide();
 		get_node("gui/menu_window").hide()
+		globals.player.cam.set_active(true);
 
 func toggle_skillmenu(set = !get_node("gui/skill_window").is_visible()):
 	if set:
-		get_tree().set_pause(true);
 		get_node("gui/fx_blur").show();
 		get_node("gui/skill_window").show();
+		globals.player.cam.set_active(false);
 	else:
-		get_tree().set_pause(false);
 		get_node("gui/fx_blur").hide();
 		get_node("gui/skill_window").hide()
+		globals.player.cam.set_active(true);
 
 func _process(delta):
 	if get_tree().is_paused():
@@ -102,8 +99,8 @@ func _process(delta):
 	get_node("gui/health_hud/health_bar").set_value(globals.player_health/float(100+(100*globals.skill_health))*100.0);
 	
 	if time >= next_tomato_reload:
-		globals.player_tomato = int(clamp(globals.player_tomato+1, 0, 4+(7*globals.skill_pocket)));
-		next_tomato_reload = time+10.0-5*globals.skill_pocket;
+		globals.player_tomato = int(clamp(globals.player_tomato+1, 0, 8+(3*globals.skill_pocket)));
+		next_tomato_reload = time+8.0-2*globals.skill_pocket;
 	
 	if globals.player_tomato > 0:
 		get_node("gui/health_hud/tomato").show();
@@ -120,7 +117,6 @@ func restart_level():
 	get_tree().reload_current_scene();
 
 func construct_level():
-	#get_node("env").add_child(load("res://scenes/scene_day.tscn").instance());
 	get_node("env").add_child(load("res://scenes/scenery.tscn").instance());
 	get_node("env/levels").generate_world(globals.world_seeds);
 
@@ -128,8 +124,7 @@ func spawn_player():
 	var inst = load("res://scenes/player.tscn").instance();
 	inst.set_translation(globals.player_pos+Vector3(0,1,0));
 	get_node("env").add_child(inst, true);
-	
-	get_node("env/cam").set_translation(globals.player_pos);
+	globals.player = inst;
 
 func init_skills():
 	list_skill_scn = load(list_skill_scn);
@@ -192,3 +187,4 @@ func player_give_exp(exps):
 
 func player_apply_damage(dmg):
 	globals.player_health = clamp(globals.player_health-dmg, 0.0, float(100+(100*globals.skill_health)));
+	globals.gui.get_node("fx_blood_splat/AnimationPlayer").play("splat");

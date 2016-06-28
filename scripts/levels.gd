@@ -47,7 +47,7 @@ func get_chunkneighboor(center):
 	return chunks;
 
 func get_chunk_size():
-	return int(globals.cfg_chunksize)*2+1;
+	return int(clamp(globals.cfg_chunksize, 1, 10))*2+1;
 
 func generate_chunk(chunk_pos):
 	var chunk = Spatial.new();

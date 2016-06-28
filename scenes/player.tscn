@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=1]
+[gd_scene load_steps=7 format=1]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
-[ext_resource path="res://models/character/cubi/cubi.scn" type="PackedScene" id=2]
-[ext_resource path="res://sounds/sfx/jumpland.wav" type="Sample" id=3]
+[ext_resource path="res://scripts/camera.gd" type="Script" id=2]
+[ext_resource path="res://models/character/cubi/cubi.scn" type="PackedScene" id=3]
+[ext_resource path="res://sounds/sfx/jumpland.wav" type="Sample" id=4]
 
 [sub_resource type="CapsuleShape" id=1]
 
@@ -11,7 +12,7 @@ height = 0.6
 
 [sub_resource type="SampleLibrary" id=2]
 
-samples/jumpland = { "db":0.0, "pitch":1.0, "sample":ExtResource( 3 ) }
+samples/jumpland = { "db":0.0, "pitch":1.0, "sample":ExtResource( 4 ) }
 
 [node name="player" type="KinematicBody"]
 
@@ -31,6 +32,21 @@ collide_with/character = true
 collision/margin = 0.001
 script/script = ExtResource( 1 )
 
+[node name="cam" type="Camera" parent="."]
+
+_import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+projection = 0
+fov = 60.0
+near = 0.1
+far = 100.0
+keep_aspect = 1
+current = false
+visible_layers = 1048575
+environment = null
+h_offset = 0.0
+v_offset = 0.0
+script/script = ExtResource( 2 )
+
 [node name="col" type="CollisionShape" parent="."]
 
 _import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
@@ -39,7 +55,7 @@ shape = SubResource( 1 )
 trigger = false
 _update_shape_index = 0
 
-[node name="models" parent="." instance=ExtResource( 2 )]
+[node name="models" parent="." instance=ExtResource( 3 )]
 
 transform/local = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.73206e-16, 0 )
 

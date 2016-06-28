@@ -15,35 +15,38 @@ const JUMP_MAX = 12;
 const ATTACK_DELAY = 0.5;
 const FALLATTACK_FORCE = 20.0;
 
-var dir = Vector3();
+var cam = null;
 var on_floor = false;
 var can_doublejump = false;
 var next_idle = 0.0;
 var next_move = 0.0;
 var next_attack = 0.0;
-var spawn_pos = Vector3();
+var body_yaw = 0.0;
+var aiming = false;
 
 var tomato = "res://scenes/tomato.tscn";
 
 func _ready():
-	spawn_pos = get_translation();
+	cam = get_node("cam");
 	tomato = load(tomato);
 	
-	globals.gui.get_node("controller_up").connect("pressed", self, "on_ctrlup_pressed");
+	cam.excl.push_back(self);
+	cam.set_active(true);
 	
 	set_process_input(true);
 	set_fixed_process(true);
 
 func _input(ie):
 	if ie.type == InputEvent.KEY:
-		if ie.scancode == KEY_SPACE && ie.pressed:
+		if ie.scancode == KEY_SPACE && ie.pressed && !aiming:
 			jump();
+	
+	if ie.type == InputEvent.MOUSE_BUTTON:
+		if ie.button_index == BUTTON_LEFT && ie.pressed && aiming:
+			attack();
 		
-		if ie.scancode == KEY_X && ie.pressed && !on_floor:
-			vel.y = -FALLATTACK_FORCE;
-
-func on_ctrlup_pressed():
-	jump();
+		if ie.button_index == BUTTON_RIGHT && ie.pressed:
+			aiming = !aiming;
 
 func jump():
 	if on_floor:
@@ -52,30 +55,32 @@ func jump():
 	elif !on_floor && can_doublejump:
 		vel.y = JUMP_FORCE+(JUMP_MAX-JUMP_FORCE)*globals.skill_jump;
 		can_doublejump = false;
+	else:
+		vel.y = -FALLATTACK_FORCE;
 
 func _fixed_process(delta):
-	dir = Vector3();
+	var dir = Vector3();
+	var aim = cam.get_global_transform().basis;
 	
-	if Input.is_key_pressed(KEY_LEFT):
-		dir.x += -1;
-	if Input.is_key_pressed(KEY_RIGHT):
-		dir.x += 1;
-	if Input.is_key_pressed(KEY_UP):
-		dir.z += -1;
-	if Input.is_key_pressed(KEY_DOWN):
-		dir.z += 1;
-	
-	var joy_dir = globals.gui.get_node("controller_joystick").direction;
-	if joy_dir.length() > 0:
-		dir.x = joy_dir.x;
-		dir.z = joy_dir.y;
+	if Input.is_key_pressed(KEY_A):
+		dir -= aim[0];
+	if Input.is_key_pressed(KEY_D):
+		dir += aim[0];
+	if Input.is_key_pressed(KEY_W):
+		dir -= aim[2];
+	if Input.is_key_pressed(KEY_S):
+		dir += aim[2];
 	
 	dir.y = 0;
+	dir = dir.normalized();
 	
-	dir = dir.normalized()
+	if aiming:
+		dir = Vector3();
+	
+	if dir.length() > 0.0:
+		body_yaw = -atan2(dir.x, dir.z);
 	
 	vel.y += g*delta
-	
 	var hvel = vel
 	hvel.y = 0
 	
@@ -137,10 +142,11 @@ func _fixed_process(delta):
 		move(floor_velocity*delta)
 	
 	var trans = get_transform();
-	trans.basis = Matrix3(Quat(trans.basis).slerp(Quat(Vector3(0,1,0), -atan2(dir.x, dir.z)), 10*delta));
+	var byaw = body_yaw;
+	if aiming:
+		byaw = deg2rad(-cam.cyaw+180);
+	trans.basis = Matrix3(Quat(trans.basis).slerp(Quat(Vector3(0,1,0), byaw), 10*delta));
 	set_transform(trans);
-	
-	attack();
 	
 	if globals.game.time > next_idle:
 		next_idle = globals.game.time + 0.1;
@@ -151,12 +157,10 @@ func _fixed_process(delta):
 			set_animation("jump");
 		elif vel.y < 0 && !on_floor:
 			set_animation("fall");
+		elif aiming:
+			set_animation("pre_shoot");
 		else:
 			set_animation("idle");
-	
-	if vel.y < -100.0:
-		vel.y = 0;
-		set_translation(spawn_pos);
 	
 	globals.player_pos = get_global_transform().origin;
 
@@ -167,20 +171,20 @@ func set_animation(ani, force = false, speed = 1.0):
 		ap.set_speed(speed);
 
 func attack():
-	if globals.game.time < next_attack || (!Input.is_key_pressed(KEY_Z) && !globals.gui.get_node("controller_attack").is_pressed):
+	if globals.game.time < next_attack || globals.player_tomato <= 0:
 		return;
 	
 	next_attack = globals.game.time+ATTACK_DELAY;
-	
-	if (dir.x == 0 && dir.z == 0) || globals.player_tomato <= 0:
-		return;
-	
 	globals.player_tomato -= 1;
 	globals.game.player_give_exp(5);
 	
+	var aim = (Vector3()-cam.get_global_transform().basis[2]).normalized();
 	var inst = tomato.instance();
 	inst.owner = self;
-	inst.set_translation(get_translation()+dir+Vector3(0,1.5,0));
-	inst.apply_impulse(Vector3(), dir*(25+5*globals.skill_throw));
+	inst.set_translation(get_translation()+aim+Vector3(0,1.5,0));
+	inst.apply_impulse(Vector3(), aim*(20+5*globals.skill_throw)+Vector3(0,5,0));
 	inst.set_angular_velocity(Vector3(1,1,1)*deg2rad(360));
 	globals.env.add_child(inst, true);
+	
+	set_animation("shoot", true);
+	next_idle = next_attack;
