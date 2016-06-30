@@ -31,7 +31,7 @@ fixed_flags/use_color_array = false
 fixed_flags/use_point_size = false
 fixed_flags/discard_alpha = false
 fixed_flags/use_xy_normalmap = false
-params/diffuse = Color( 1, 0, 0, 0.589972 )
+params/diffuse = Color( 1, 0, 0, 0.61809 )
 params/specular = Color( 0, 0, 0, 1 )
 params/emission = Color( 1, 0, 0, 1 )
 params/specular_exp = 40
@@ -117,7 +117,7 @@ params/emission_cone/attenuation_db = -6.0
 config/polyphony = 1
 config/samples = SubResource( 2 )
 
-[node name="laser" type="ImmediateGeometry" parent="."]
+[node name="trajectory" type="ImmediateGeometry" parent="."]
 
 _import_transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 layers = 1

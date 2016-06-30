@@ -36,17 +36,27 @@ func _input(ie):
 	if ie.type == InputEvent.MOUSE_MOTION:
 		pitch = clamp(pitch+ie.relative_y*sensitivity, -80.0, 80.0);
 		yaw = fmod(yaw-ie.relative_x*sensitivity, 360.0);
+		
+		if !globals.cfg_caminterpolation:
+			update_camera();
 
 func _process(delta):
-	cpitch = lerp(cpitch, pitch, 10*delta);
-	cyaw += (abs(cyaw-yaw)>180)*sign(cyaw)*-360.0;
-	cyaw = lerp(cyaw, yaw, 10*delta);
+	if globals.cfg_caminterpolation:
+		cpitch = lerp(cpitch, pitch, 10*delta);
+		cyaw += (abs(cyaw-yaw)>180)*sign(cyaw)*-360.0;
+		cyaw = lerp(cyaw, yaw, 10*delta);
+	else:
+		cpitch = pitch;
+		cyaw = yaw;
 	
 	if player.aiming:
 		cdist = lerp(cdist, 4.0, 10*delta);
 	else:
 		cdist = lerp(cdist, dist, 10*delta);
 	
+	update_camera();
+
+func update_camera():
 	pos = player.get_global_transform().origin;
 	pos.x += cdist*sin(deg2rad(cyaw))*cos(deg2rad(cpitch));
 	pos.y += cdist*sin(deg2rad(cpitch));
@@ -59,7 +69,7 @@ func _process(delta):
 		target += m;
 	
 	var from = pos;
-	if !ray_res.empty():
+	if !ray_res.empty() && ray_res.collider extends StaticBody:
 		from = ray_res.position;
 	
 	look_at_from_pos(from, target, Vector3(0,1,0));

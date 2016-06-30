@@ -19,17 +19,19 @@ var cam = null;
 var on_floor = false;
 var can_doublejump = false;
 var next_idle = 0.0;
-var next_move = 0.0;
 var next_attack = 0.0;
 var body_yaw = 0.0;
 var aiming = false;
+var projectile = preload("res://scripts/projectile.gd");
 
 var tomato = "res://scenes/tomato.tscn";
 
 func _ready():
 	cam = get_node("cam");
 	tomato = load(tomato);
+	projectile = projectile.new();
 	
+	get_node("trajectory").get_material_override().set_line_width(3);
 	cam.excl.push_back(self);
 	cam.set_active(true);
 	
@@ -38,17 +40,20 @@ func _ready():
 
 func _input(ie):
 	if ie.type == InputEvent.KEY:
-		if ie.scancode == KEY_SPACE && ie.pressed && !aiming:
+		if ie.scancode == KEY_SPACE && ie.pressed:
 			jump();
 	
 	if ie.type == InputEvent.MOUSE_BUTTON:
 		if ie.button_index == BUTTON_LEFT && ie.pressed && aiming:
 			attack();
 		
-		if ie.button_index == BUTTON_RIGHT && ie.pressed:
+		if ie.button_index == BUTTON_RIGHT && ie.pressed && !globals.player_dying:
 			aiming = !aiming;
 
 func jump():
+	if aiming || globals.player_dying:
+		return;
+	
 	if on_floor:
 		vel.y = JUMP_FORCE+(JUMP_MAX-JUMP_FORCE)*globals.skill_jump;
 		can_doublejump = true;
@@ -74,7 +79,7 @@ func _fixed_process(delta):
 	dir.y = 0;
 	dir = dir.normalized();
 	
-	if aiming:
+	if aiming || globals.player_dying:
 		dir = Vector3();
 	
 	if dir.length() > 0.0:
@@ -96,11 +101,8 @@ func _fixed_process(delta):
 	
 	vel.x = hvel.x
 	vel.z = hvel.z
-	if globals.game.time < next_move:
-		vel *= 0;
 	
 	var motion = move(vel*delta)
-	
 	on_floor = false
 	var original_vel = vel
 	var floor_velocity = Vector3()
@@ -122,6 +124,7 @@ func _fixed_process(delta):
 			if collider extends preload("res://scripts/zombie.gd"):
 				collider.kill();
 				globals.game.player_give_exp(40);
+				globals.game.player_apply_damage(-25);
 		
 		if (rad2deg(acos(n.dot(Vector3(0, 1, 0)))) < MAX_SLOPE_ANGLE):
 				# If angle to the "up" vectors is < angle tolerance,
@@ -143,7 +146,7 @@ func _fixed_process(delta):
 	
 	var trans = get_transform();
 	var byaw = body_yaw;
-	if aiming:
+	if aiming && !globals.player_dying:
 		byaw = deg2rad(-cam.cyaw+180);
 	trans.basis = Matrix3(Quat(trans.basis).slerp(Quat(Vector3(0,1,0), byaw), 10*delta));
 	set_transform(trans);
@@ -151,7 +154,9 @@ func _fixed_process(delta):
 	if globals.game.time > next_idle:
 		next_idle = globals.game.time + 0.1;
 		
-		if dir.length() >= 0.5 && on_floor:
+		if globals.player_dying:
+			set_animation("died");
+		elif dir.length() >= 0.5 && on_floor:
 			set_animation("run", false, move_speed/float(MOVE_SPEED));
 		elif vel.y > 0 && !on_floor:
 			set_animation("jump");
@@ -162,28 +167,34 @@ func _fixed_process(delta):
 		else:
 			set_animation("idle");
 	
-	update_laser();
+	update_trajectory();
 	globals.player_pos = get_global_transform().origin;
 
-func update_laser():
-	var mesh = get_node("laser");
-	if !aiming:
+func update_trajectory():
+	var mesh = get_node("trajectory");
+	if !aiming || globals.player_dying:
 		mesh.hide();
 		return;
 	
 	mesh.show();
 	var begin = Vector3(0,0.8,1);
-	var end = begin+Vector3(0,0,1)*100;
-	var mesh = get_node("laser");
-	mesh.get_material_override().set_line_width(2);
+	var angle = cam.pitch-40;
+	projectile.velocity = Vector2(20,0).rotated(deg2rad(angle));
+	projectile.startpoint = Vector2(begin.z, begin.y);
+	
 	mesh.clear();
 	mesh.begin(Mesh.PRIMITIVE_LINE_STRIP, null);
-	mesh.add_vertex(begin);
-	mesh.add_vertex(end);
+	
+	var time = 0.0;
+	for i in range(20):
+		var pos = Vector2(projectile.getX(time), projectile.getY(time));
+		mesh.add_vertex(Vector3(0,pos.y,pos.x));
+		time += 0.1;
+	
 	mesh.end();
 
 func set_animation(ani, force = false, speed = 1.0):
-	var ap = get_node("models/AnimationPlayer");
+	var ap = get_node("models/animations");
 	if ap.get_current_animation() != ani || force:
 		ap.play(ani);
 		ap.set_speed(speed);

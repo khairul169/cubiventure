@@ -59,12 +59,11 @@ func _fixed_process(delta):
 	set_transform(trans);
 	
 	if globals.game.time > next_idle:
-		next_idle = globals.game.time + 0.5;
+		next_idle = globals.game.time + 2.0;
 		set_animation("idle");
 		
-		if globals.env.has_node("player"):
-			var player = globals.env.get_node("player");
-			var dist = globals.env.get_node("player").get_global_transform().origin-get_global_transform().origin;
+		if globals.player != null && !globals.player_dying:
+			var dist = globals.player.get_global_transform().origin-get_global_transform().origin;
 			var eyesight = 15.0;
 			if globals.world_time >= 18 || globals.world_time < 5.5:
 				eyesight = 20.0;
@@ -76,7 +75,7 @@ func _fixed_process(delta):
 				attack();
 
 func set_animation(ani, force = false, speed = 1.0):
-	var ap = get_node("models/AnimationPlayer");
+	var ap = get_node("models/animations");
 	if ap.get_current_animation() != ani || force:
 		ap.play(ani);
 		ap.set_speed(speed);

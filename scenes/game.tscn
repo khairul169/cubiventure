@@ -418,7 +418,7 @@ percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 
-[node name="btnRestart" type="TextureButton" parent="gui/menu_window"]
+[node name="btnSettings" type="TextureButton" parent="gui/menu_window"]
 
 anchor/left = 3
 anchor/top = 3
@@ -432,6 +432,7 @@ margin/left = 93.0
 margin/top = 53.0
 margin/right = -93.0
 margin/bottom = 5.0
+disabled = true
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
@@ -440,7 +441,7 @@ textures/pressed = ExtResource( 16 )
 textures/hover = ExtResource( 17 )
 __meta__ = { "_editor_collapsed":true }
 
-[node name="txt" type="Label" parent="gui/menu_window/btnRestart"]
+[node name="txt" type="Label" parent="gui/menu_window/btnSettings"]
 
 anchor/right = 1
 anchor/bottom = 1
@@ -454,7 +455,7 @@ margin/right = 0.0
 margin/bottom = 0.0
 custom_fonts/font = ExtResource( 4 )
 custom_colors/font_color = Color( 0.773438, 0.773438, 0.773438, 1 )
-text = "Restart"
+text = "Settings"
 align = 1
 valign = 1
 percent_visible = 1.0

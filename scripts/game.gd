@@ -95,10 +95,11 @@ func _process(delta):
 		return;
 	time += delta;
 	
-	globals.player_health = clamp(globals.player_health+((1+9*globals.skill_medic)*delta), 0.0, 100+100*globals.skill_health);
+	if  !globals.player_dying:
+		player_apply_damage((0.5-0.5*globals.skill_medic)*delta, true);
 	get_node("gui/health_hud/health_bar").set_value(globals.player_health/float(100+(100*globals.skill_health))*100.0);
 	
-	if time >= next_tomato_reload:
+	if time >= next_tomato_reload && !globals.player_dying:
 		globals.player_tomato = int(clamp(globals.player_tomato+1, 0, 8+(3*globals.skill_pocket)));
 		next_tomato_reload = time+8.0-2*globals.skill_pocket;
 	
@@ -185,6 +186,20 @@ func player_give_exp(exps):
 		
 		popup_notification(str("Level up to ",globals.player_lvl,"! SP +5"));
 
-func player_apply_damage(dmg):
+func player_apply_damage(dmg, hide_bloodsplat = false):
 	globals.player_health = clamp(globals.player_health-dmg, 0.0, float(100+(100*globals.skill_health)));
-	globals.gui.get_node("fx_blood_splat/AnimationPlayer").play("splat");
+	
+	if dmg > 0 && !hide_bloodsplat:
+		globals.gui.get_node("fx_blood_splat/AnimationPlayer").play("splat");
+	
+	if globals.player_health <= 0.0:
+		player_kill();
+
+func player_kill():
+	globals.player_dying = true;
+	globals.player.next_idle = globals.game.time;
+	globals.player.aiming = false;
+	#globals.player.cam.set_active(false);
+	
+	popup_notification("Game over!");
+

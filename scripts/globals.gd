@@ -19,6 +19,7 @@ var cfg_glow;
 var cfg_fog;
 var cfg_showfps;
 var cfg_timecyclefps;
+var cfg_caminterpolation;
 
 const ENCRYPTED_SAVEGAME = false;
 const SAVEGAME_PATH = "user://savegame.dat";
@@ -28,6 +29,7 @@ var savedata_var = [];
 var world_seeds;
 var world_time;
 var player_health;
+var player_dying;
 var player_pos;
 var player_exp;
 var player_lvl;
@@ -55,6 +57,7 @@ func _init():
 	cfg_fog = true;
 	cfg_showfps = false;
 	cfg_timecyclefps = 10.0;
+	cfg_caminterpolation = true;
 	
 	config_var.push_back("cfg_fpscap");
 	config_var.push_back("cfg_shadow");
@@ -67,10 +70,12 @@ func _init():
 	config_var.push_back("cfg_fog");
 	config_var.push_back("cfg_showfps");
 	config_var.push_back("cfg_timecyclefps");
+	config_var.push_back("cfg_caminterpolation");
 	
 	world_seeds = int(OS.get_unix_time());
 	world_time = 8.0;
 	player_health = 100.0;
+	player_dying = false;
 	player_tomato = 1;
 	player_pos = Vector3();
 	player_lvl = 1;
@@ -87,6 +92,7 @@ func _init():
 	savedata_var.push_back("world_time");
 	savedata_var.push_back("world_seeds");
 	savedata_var.push_back("player_health");
+	savedata_var.push_back("player_dying");
 	savedata_var.push_back("player_pos");
 	savedata_var.push_back("player_tomato");
 	savedata_var.push_back("player_lvl");
